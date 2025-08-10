@@ -1,5 +1,5 @@
 # Erika_IF2014
-Ein serielles Interface für die elektronische Schreibmaschine 'Erika 3004'.
+Ein serielles Interface für die elektronische Schreibmaschine Erika S3004.
 Die Schaltung basiert auf einem Atmega 1284P Mikrocontroller.
 Die Programmierung der Firmware des Atmega erfolgt in C.
 

@@ -2,21 +2,31 @@
 #define MAIN_H
 
 // constants
-#define VERSION "1.0 28-Feb-2014"
-#define F_CPU 18432000ul
+#define VERSION "1.1 10-Aug-2025"
+// #define F_CPU 18432000ul
+#define F_CPU     3686400ul
 
-#define NBAUDRATES	3		// # of baudrate definitions
+#define NBAUDRATES	7		// # of baudrate definitions
 
-#define UART0_BAUD1 1200ul
-#define UART0_BAUD2 9600ul
-#define UART0_BAUD3 115200ul
-#define DEFAULTBAUD 2
+#define UART0_BAUD1 300ul
+#define UART0_BAUD2 600ul
+#define UART0_BAUD3 1200ul
+#define UART0_BAUD4 2400ul
+#define UART0_BAUD5 4800ul
+#define UART0_BAUD6 9600ul
+#define UART0_BAUD7 19200ul
+#define DEFAULTBAUD 6
 
 #define UART1_BAUD 1200ul
 
 #define UART0_UBRR_VALUE1 ((F_CPU/(UART0_BAUD1<<4))-1)
 #define UART0_UBRR_VALUE2 ((F_CPU/(UART0_BAUD2<<4))-1)
 #define UART0_UBRR_VALUE3 ((F_CPU/(UART0_BAUD3<<4))-1)
+#define UART0_UBRR_VALUE4 ((F_CPU/(UART0_BAUD4<<4))-1)
+#define UART0_UBRR_VALUE5 ((F_CPU/(UART0_BAUD5<<4))-1)
+#define UART0_UBRR_VALUE6 ((F_CPU/(UART0_BAUD6<<4))-1)
+#define UART0_UBRR_VALUE7 ((F_CPU/(UART0_BAUD7<<4))-1)
+
 
 #define UART1_UBRR_VALUE ((F_CPU/(UART1_BAUD<<4))-1)
 

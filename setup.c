@@ -15,7 +15,10 @@ uint8_t		LinesPerPage	EEMEM;
 uint8_t getChoice(char * s);
 uint8_t getNumber(char * s);
 uint8_t LPP();	// lines per page
-void printCurrentSettings(uint8_t i);
+void printCurrentSettings(uint8_t);
+void move_back(void);
+void move_forward(void);
+void FormFeed(uint8_t);
 
 void Setup(void)
 {
@@ -27,10 +30,10 @@ uint8_t a;
 	RememberTrans = stTranslate;	// remember translation setting
 	stTranslate = ASCII;
 
+	printStringCR("**** Erika S3004 Interface Setup ****");
 	printString("Firmware V");printStringCR(VERSION);
 
-	printStringCR("Interface Setup");
-	printStringCR("---------------");
+	printStringCR("-------------------------");
 	UART1_sendChar(ENEWLINE);
 	printStringCR("Current Settings:");
 	printString(" 1  Baud Rate       ");
@@ -49,15 +52,21 @@ uint8_t a;
 	UART1_sendChar(ENEWLINE);
 	printStringCR(" Press (1) to (6) to change one item, (a) to change all,");
 	printString(" (x) to leave setup without changes: ");
+
 	a = getChoice("123456ax");
+
 	if (a != 'x') {
 		if ((a == '1') || (a == 'a')) {
 			printStringCR("Baud Rate:");
-			printStringCR(" 1  1200");
-			printStringCR(" 2  9600");
-			printStringCR(" 3  115200");
-			printString(" Press (1) to (3) to select: ");
-			stBaud = getChoice("123") - '0';
+			printStringCR(" 1  300");
+			printStringCR(" 2  600");
+			printStringCR(" 3  1200");
+			printStringCR(" 4  2400");
+			printStringCR(" 5  4800");
+			printStringCR(" 6  9600");
+			printStringCR(" 7  19200");
+			printString(" Press (1) to (7) to select: ");
+			stBaud = getChoice("1234567") - '0';
 			eeprom_update_byte(&BaudSetting,stBaud);
 		}
 		if ((a == '2') || (a == 'a')) {
@@ -72,8 +81,15 @@ uint8_t a;
 		if ((a == '3') || (a == 'a')) {
 			printStringCR("Lines per Page, before Stop:");
 			printString(" Enter as 2 digit number, 00 for no Stop: ");
+
+			move_forward();
 			MaxLines = (getNumber("0123456789") - '0') * 10;
 			MaxLines += getNumber("0123456789") - '0';
+			move_back();
+			printChar(MaxLines/10+'0');
+			printChar(MaxLines%10+'0');
+
+
 			UART1_sendChar(ENEWLINE);
 			UART1_sendChar(ENEWLINE);
 			eeprom_update_byte(&LinesPerPage,MaxLines);
@@ -104,14 +120,45 @@ uint8_t a;
 		}
 	}
 	SetupToggle = FALSE;
+	printStringCR("**** End of Interface Setup ****");
+	FormFeed(MaxLines);
+
 	init();	// load settings
 
 }	// end of Setup
 
+
+void FormFeed(uint8_t lines)
+{
+	for (uint8_t i=0;i<lines;i++)
+	{
+		UART1_sendChar(ENEWLINE);
+	}
+}
+
+
+void move_back(void)
+{
+	for (uint8_t i=0;i<10;i++) {
+		UART1_sendChar(0x76);
+	}
+}
+
+void move_forward(void)
+{
+	for (uint8_t i=0;i<10;i++) {
+		UART1_sendChar(0x75);
+	}
+}
+
+
 uint8_t getChoice(char * s)
 {
 uint8_t a;
+	move_forward();
 	a = getNumber(s);
+	move_back();
+	printChar(a);
 	UART1_sendChar(ENEWLINE);
 	UART1_sendChar(ENEWLINE);
 	return a;
@@ -135,7 +182,6 @@ char * here;
 			here++;
 		}
 	} while (!ok); // wait for a valid key
-	printChar(a);
 	return a;
 }
 
@@ -228,9 +274,13 @@ void printCurrentSettings(uint8_t i)
 {
 	switch(i) {
 	case 1:
-		if (stBaud == 1) printString("1200");
-		if (stBaud == 2) printString("9600");
-		if (stBaud == 3) printString("115200");		
+		if (stBaud == 1) printString("300");
+		if (stBaud == 2) printString("600");
+		if (stBaud == 3) printString("1200");		
+		if (stBaud == 4) printString("2400");		
+		if (stBaud == 5) printString("4800");		
+		if (stBaud == 6) printString("9600");		
+		if (stBaud == 7) printString("115200");		
 		break;
 	case 2:
 		if (stProtocol == 1) printString("None");

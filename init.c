@@ -60,6 +60,22 @@ uint8_t cbr;	// cuurent baud rate for host interface
 		UBRR0H = (uint8_t) (UART0_UBRR_VALUE3>>8);
 		UBRR0L = (uint8_t) UART0_UBRR_VALUE3;
 		break;
+	case 4:
+		UBRR0H = (uint8_t) (UART0_UBRR_VALUE4>>8);
+		UBRR0L = (uint8_t) UART0_UBRR_VALUE4;
+		break;
+	case 5:
+		UBRR0H = (uint8_t) (UART0_UBRR_VALUE5>>8);
+		UBRR0L = (uint8_t) UART0_UBRR_VALUE5;
+		break;
+	case 6:
+		UBRR0H = (uint8_t) (UART0_UBRR_VALUE6>>8);
+		UBRR0L = (uint8_t) UART0_UBRR_VALUE6;
+		break;
+	case 7:
+		UBRR0H = (uint8_t) (UART0_UBRR_VALUE7>>8);
+		UBRR0L = (uint8_t) UART0_UBRR_VALUE7;
+		break;
 	}
 	UBRR1H = (uint8_t) (UART1_UBRR_VALUE>>8);
 	UBRR1L = (uint8_t) UART1_UBRR_VALUE;
@@ -77,7 +93,7 @@ uint8_t cbr;	// cuurent baud rate for host interface
 void initStatus(void)
 {
 	stBaud = eeprom_read_byte(&BaudSetting);
-	if ((stBaud < 1) || (stBaud > 3)) stBaud = 2;	// 9600
+	if ((stBaud < 1) || (stBaud > NBAUDRATES)) stBaud = 6;	// 9600 Baud as default
 	stProtocol = eeprom_read_byte(&ProtocolSetting);
 	if ((stProtocol < 1) || (stProtocol > 3)) stProtocol = 1;	// no flow control
 	stTranslate = eeprom_read_byte(&TransSetting);	// ASCII or RAW

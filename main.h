@@ -2,9 +2,9 @@
 #define MAIN_H
 
 // constants
-#define VERSION "1.1 10-Aug-2025"
-// #define F_CPU 18432000ul
-#define F_CPU     3686400ul
+#define VERSION "1.2 1-Sep-2025"
+#define F_CPU 18432000ul
+//#define F_CPU     3686400ul
 
 #define NBAUDRATES	7		// # of baudrate definitions
 
@@ -27,17 +27,17 @@
 #define UART0_UBRR_VALUE6 ((F_CPU/(UART0_BAUD6<<4))-1)
 #define UART0_UBRR_VALUE7 ((F_CPU/(UART0_BAUD7<<4))-1)
 
-
 #define UART1_UBRR_VALUE ((F_CPU/(UART1_BAUD<<4))-1)
 
 #define ALLPINSOUT	0b11111111	// entire Atmel port to Output
 #define ALLPINSIN	0b00000000	// entire Atmel port to Input
-#define ERESET		0x95		// reset Erika
-#define ENEWLINE	0x77		// Erika code for New Line
-#define CODE_H		0xD6		// Code + h on Erika keyboard
-#define CODE_I		0xDD		// Code + i on Erika keyboard
-#define PRINTBUFSIZE 14500		// size for print buffer
-#define PRINTBUF_FULL PRINTBUFSIZE / 3 * 2
+#define eRESET		0x95		// reset Erika
+#define eNEWLINE	0x77		// Erika code for New Line
+#define eLEFTMARGIN 0x7E		// Erika set left margin
+#define CODE_Hex	0xD6		// Code + h on Erika keyboard
+#define CODE_Setup	0xDD		// Code + i on Erika keyboard
+#define PRINTBUFSIZE 14000		// size for print buffer
+#define PRINTBUF_FULL PRINTBUFSIZE - 100
 #define PRINTBUF_LOW 10
 #define KEYBUFSIZE	256			// keyboard buffer size, must be 256!
 
@@ -68,8 +68,8 @@
 #define CR			13			// Carriage Return
 #define LF			10			// Line Feed
 #define FORMFEED	12			// Form Feed
-#define ASCII		1			// ASCII vs. RAW charset
-#define RAW			2		
+#define ASCII		1			// ASCII Char set + some Esc Sequences
+#define RAW			2			// Typewriter Char Set
 #define XON			17
 #define XOFF		19
 
@@ -77,10 +77,12 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
 #include <util/delay.h>
 #include <stdio.h>
 #include <string.h>
-#include <avr/eeprom.h>
+
 
 // function prototypes
 void init(void);
@@ -98,6 +100,7 @@ char waitForHostChar(void);
 void printString(char *s);
 void printStringCR(char *s);
 void Setup(void);
+void FormFeed(uint8_t);
 
 // status variables, these are being read from EEPROM after power on
 extern uint8_t stBaud;
@@ -123,8 +126,9 @@ extern uint8_t				keyBuf[KEYBUFSIZE];
 extern volatile uint8_t	keyInPtr;
 extern uint8_t	keyOutPtr;
 extern volatile uint8_t	keyBufUsage;
-extern volatile uint8_t	HexToggle;
-extern volatile uint8_t	SetupToggle;
+extern volatile uint8_t	HexTrigger;
+extern volatile uint8_t	SetupTrigger;
+extern volatile uint8_t DemoTrigger;
 
 extern uint8_t	UnderlineFlag;
 extern uint8_t	BoldFlag;

@@ -1,27 +1,29 @@
 /*
   Robotron Erika S3004
   Firmware für Steuerplatine, Atmega 1284p
-  M.Berger, Dezember 2013
+  M.Berger, 
+
+  Aktuelle Version: August 2025
+  Erste Version:    Dezember 2013
 */
 
 #include "main.h"
 
 // local prototypes
 void waitForContinueKey();
+void printDemoText();
 
 int main(void)
 {
 uint8_t	c;
 	init();
 	sei();						// allow interrupts
-// *********************
-//	testcode();
-// *********************
+
 	while (1)
 	{
 		if (keyBufUsage) sendKey();
-		if (HexToggle) HexDumpMode();
-		if (SetupToggle) Setup();
+		if (HexTrigger) HexDumpMode();
+		if (SetupTrigger) Setup();
 		if (printBufUsage) {
 			cli();
 			printBufUsage--;
@@ -73,7 +75,7 @@ void printChar(uint8_t c)
 		}
 		else {	// perform actions for control chars
 			if (c == CR) {
-				if (stCRfromHost == 2) UART1_sendChar(ENEWLINE);// CR --> NewLine
+				if (stCRfromHost == 2) UART1_sendChar(eNEWLINE);// CR --> NewLine
 				else UART1_sendChar(0x78);						// CR --> CR	
 			}
 			if (c == LF) UART1_sendChar(0x9F);	// Line Feed		
@@ -279,7 +281,7 @@ void UART1_sendChar(uint8_t c)		// to typewriter
 	{
 	}	                       
     UDR1 = c;                      	// send char
-	while (!(PINA & (1<<PA0)))				// wait until Erika is ready
+	while (!(PINA & (1<<PA0)))		// wait until Erika is ready
 	{
 	}
 }	// end of UART1_sendChar
@@ -291,7 +293,7 @@ uint8_t c,x;
 	c = keyBuf[keyOutPtr++];
 	keyBufUsage--;
 	sei();
-	if (c == ENEWLINE) {
+	if (c == eNEWLINE) {
 		UART0_sendChar(CR);
 		if (stCRtoHost == 2) UART0_sendChar(LF);	// CR --> CR LF translation
 	}
@@ -299,7 +301,6 @@ uint8_t c,x;
 		x = revtrans[c]; 
 		UART0_sendChar(x);
 	}
-	// printHexCode(c);		// M.B. TEST CODE!!!
 }	// end of sendKey
 
 void UART0_sendChar(uint8_t c)	// to host
@@ -329,8 +330,8 @@ char c;
 uint8_t i;
 uint8_t cnt = 0;	// counter for chars per line
 uint8_t leftover;
-	HexToggle = FALSE;
-	UART1_sendChar(ENEWLINE);
+	HexTrigger = FALSE;
+	UART1_sendChar(eNEWLINE);
 	do {
 		if (printBufUsage) {
 			cli();
@@ -349,10 +350,10 @@ uint8_t leftover;
 				printChar(a[i]);
 				a[i] = '.';
 			}
-			UART1_sendChar(ENEWLINE);
+			UART1_sendChar(eNEWLINE);
 		}
-	} while (!HexToggle);
-	HexToggle = FALSE;
+	} while (!HexTrigger);
+	HexTrigger = FALSE;
 	// print the remaining ASCII chars:
 	if (cnt < 16) {
 		leftover = 16 - cnt;
@@ -366,24 +367,9 @@ uint8_t leftover;
 			printChar(a[i]);
 		}
 	}
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
 }	// end of HexDumpMode
 
-// *************************
-
-void testcode(void)
-{
-uint8_t i,j;
-	for (i=0;i<12;i++) {
-		for (j=0;j<10;j++) {
-			UART1_sendChar(0xA9);
-			UART1_sendChar(i*10+j);
-			UART1_sendChar(0x71);
-			UART1_sendChar(0x71);
-		}
-		UART1_sendChar(ENEWLINE);
-	}
-} // end of testcode
 
 void printString(char *s)
 {
@@ -395,7 +381,7 @@ void printString(char *s)
 void printStringCR(char *s)
 {
 	printString(s);
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
 }
 
 void waitForContinueKey()
@@ -405,3 +391,5 @@ void waitForContinueKey()
 	{ }					// wait for CONT Key to be pressed
 	PORTD &= ~(1<<PD5);	// switch Cont LED off
 }
+
+

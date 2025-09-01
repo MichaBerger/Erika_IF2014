@@ -93,15 +93,15 @@ uint8_t cbr;	// cuurent baud rate for host interface
 void initStatus(void)
 {
 	stBaud = eeprom_read_byte(&BaudSetting);
-	if ((stBaud < 1) || (stBaud > NBAUDRATES)) stBaud = 6;	// 9600 Baud as default
+	if ((stBaud < 1) || (stBaud > NBAUDRATES)) stBaud = 6;		// 9600 Baud as default
 	stProtocol = eeprom_read_byte(&ProtocolSetting);
 	if ((stProtocol < 1) || (stProtocol > 3)) stProtocol = 1;	// no flow control
-	stTranslate = eeprom_read_byte(&TransSetting);	// ASCII or RAW
-	if ((stTranslate < 1) || (stTranslate > 2)) stTranslate = 1;
+	stTranslate = eeprom_read_byte(&TransSetting);				// ASCII or RAW
+	if ((stTranslate < 1) || (stTranslate > 2)) stTranslate = ASCII;
 	stCRfromHost = eeprom_read_byte(&CRfromHost);
-	if ((stCRfromHost < 1) || (stCRfromHost > 2)) stCRfromHost = 2;
+	if ((stCRfromHost < 1) || (stCRfromHost > 2)) stCRfromHost = 1;	// CR -> CR
 	stCRtoHost = eeprom_read_byte(&CRtoHost);
-	if ((stCRtoHost < 1) || (stCRtoHost > 2)) stCRtoHost = 1;
+	if ((stCRtoHost < 1) || (stCRtoHost > 2)) stCRtoHost = 2;		// CR -> CR LF
 
 	stLocal = eeprom_read_byte(&LocalSetting);	// allow direct typing
 	if (stLocal != FALSE) stLocal = TRUE;
@@ -111,7 +111,7 @@ void initStatus(void)
 	if (stProtocol == 2) UART0_sendChar(XON);	// send initial XON
 
 	MaxLines = eeprom_read_byte(&LinesPerPage);	// lines before stop
-	if (MaxLines > 99) MaxLines = 62;			// initial value
+	if (MaxLines > 99) MaxLines = 60;			// initial value
 	LineCounter = 0;	// reset Line Counter
 	inPtr = 0;
 	outPtr = 0;
@@ -121,8 +121,8 @@ void initStatus(void)
 	keyBufUsage = 0;
 
 	XOFFsent = FALSE;
-	HexToggle = FALSE;
-	SetupToggle = FALSE;
+	HexTrigger = FALSE;
+	SetupTrigger = FALSE;
 	UnderlineFlag = FALSE;
 	BoldFlag = FALSE;
 
@@ -132,7 +132,7 @@ void initStatus(void)
 	else SEND_LED_OFF;
 	CONT_LED_OFF;
 	DATA_LED_ON;
-	UART1_sendChar(ERESET);		// reset Erika
+	UART1_sendChar(eRESET);					// reset Erika
 	if (stLocal) UART1_sendChar(LOCAL_ON);	// local keyboard echo on
 	else UART1_sendChar(LOCAL_OFF);
 }	// end of initStatus
@@ -142,10 +142,14 @@ void initMargins(void)	// set margins for typewriter
 uint8_t i;
 	UART1_sendChar(0x80);	// release margin
 	for (i=0;i<9;i++) UART1_sendChar(0x72);	// back space
-	UART1_sendChar(0x7E);	// set left margin
+	UART1_sendChar(eLEFTMARGIN);	// set left margin
+/*
+ Do not set a right margin for now
+
 	for (i=0;i<74;i++) UART1_sendChar(0x71);	// space
 	UART1_sendChar(0x80);	// release margin
 	for (i=0;i<20;i++) UART1_sendChar(0x71);	// space
 	UART1_sendChar(0x7F);	// set right margin
+*/
 	UART1_sendChar(0x78);	// carriage return
 }

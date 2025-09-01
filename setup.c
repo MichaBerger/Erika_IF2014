@@ -24,9 +24,14 @@ void Setup(void)
 {
 uint8_t a;
 	// first set Local echo off, ASCII
+	init();
+
 	stLocal = FALSE;
 	LOCAL_LED_OFF;
 	UART1_sendChar(LOCAL_OFF);
+	for (uint8_t i=1;i<5;i++) printChar(' ');
+	UART1_sendChar(eLEFTMARGIN);	
+
 	RememberTrans = stTranslate;	// remember translation setting
 	stTranslate = ASCII;
 
@@ -34,7 +39,7 @@ uint8_t a;
 	printString("Firmware V");printStringCR(VERSION);
 
 	printStringCR("-------------------------");
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
 	printStringCR("Current Settings:");
 	printString(" 1  Baud Rate       ");
 	printCurrentSettings(1);
@@ -49,7 +54,7 @@ uint8_t a;
 	printString(" 6  CR to Host      ");
 	printCurrentSettings(6);
 	
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
 	printStringCR(" Press (1) to (6) to change one item, (a) to change all,");
 	printString(" (x) to leave setup without changes: ");
 
@@ -57,20 +62,16 @@ uint8_t a;
 
 	if (a != 'x') {
 		if ((a == '1') || (a == 'a')) {
-			printStringCR("Baud Rate:");
-			printStringCR(" 1  300");
-			printStringCR(" 2  600");
-			printStringCR(" 3  1200");
-			printStringCR(" 4  2400");
-			printStringCR(" 5  4800");
-			printStringCR(" 6  9600");
-			printStringCR(" 7  19200");
+			printStringCR("1. Baud Rate:");
+			printStringCR(" 1:   300   2:   600   3:  1200");
+			printStringCR(" 4:  2400   5:  4800   6:  9600");
+			printStringCR(" 7: 19200");
 			printString(" Press (1) to (7) to select: ");
 			stBaud = getChoice("1234567") - '0';
 			eeprom_update_byte(&BaudSetting,stBaud);
 		}
 		if ((a == '2') || (a == 'a')) {
-			printStringCR("Handshake:");
+			printStringCR("2. Handshake:");
 			printStringCR(" 1  None");
 			printStringCR(" 2  XON/XOFF");
 			printStringCR(" 3  RTS/CTS");
@@ -79,7 +80,7 @@ uint8_t a;
 			eeprom_update_byte(&ProtocolSetting,stProtocol);
 		}
 		if ((a == '3') || (a == 'a')) {
-			printStringCR("Lines per Page, before Stop:");
+			printStringCR("3. Lines per Page, before Stop:");
 			printString(" Enter as 2 digit number, 00 for no Stop: ");
 
 			move_forward();
@@ -90,20 +91,20 @@ uint8_t a;
 			printChar(MaxLines%10+'0');
 
 
-			UART1_sendChar(ENEWLINE);
-			UART1_sendChar(ENEWLINE);
+			UART1_sendChar(eNEWLINE);
+			UART1_sendChar(eNEWLINE);
 			eeprom_update_byte(&LinesPerPage,MaxLines);
 		}
 		if ((a == '4') || (a == 'a')) {
-			printStringCR("Character Set:");
+			printStringCR("4. Character Set Translation:");
 			printStringCR(" 1  ASCII");
-			printStringCR(" 2  raw");
-			printString(" Press (1) or (2) to select: ");
+			printStringCR(" 2  Typewriter Char Set");
+			printString(" Press (1) to (2) to select: ");
 			RememberTrans = getChoice("12") - '0';
 			eeprom_update_byte(&TransSetting,RememberTrans);
 		}
 		if ((a == '5') || (a == 'a')) {
-			printStringCR("CR from Host Translation:");
+			printStringCR("5. CR from Host Translation:");
 			printStringCR(" 1  CR");
 			printStringCR(" 2  CR LF");
 			printString(" Press (1) or (2) to select: ");
@@ -111,7 +112,7 @@ uint8_t a;
 			eeprom_update_byte(&CRfromHost,stCRfromHost);
 		}
 		if ((a == '6') || (a == 'a')) {
-			printStringCR("CR to Host Translation:");
+			printStringCR("6. CR to Host Translation:");
 			printStringCR(" 1  CR");
 			printStringCR(" 2  CR LF");
 			printString(" Press (1) or (2) to select: ");
@@ -119,7 +120,7 @@ uint8_t a;
 			eeprom_update_byte(&CRtoHost,stCRtoHost);
 		}
 	}
-	SetupToggle = FALSE;
+	SetupTrigger = FALSE;
 	printStringCR("**** End of Interface Setup ****");
 	FormFeed(MaxLines);
 
@@ -132,7 +133,7 @@ void FormFeed(uint8_t lines)
 {
 	for (uint8_t i=0;i<lines;i++)
 	{
-		UART1_sendChar(ENEWLINE);
+		UART1_sendChar(eNEWLINE);
 	}
 }
 
@@ -159,8 +160,8 @@ uint8_t a;
 	a = getNumber(s);
 	move_back();
 	printChar(a);
-	UART1_sendChar(ENEWLINE);
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
+	UART1_sendChar(eNEWLINE);
 	return a;
 }
 
@@ -185,13 +186,13 @@ char * here;
 	return a;
 }
 
-uint8_t LPP()
+uint8_t LPP()	// lines per page
 {
 uint8_t a,c,nLines;
 	BoldFlag = TRUE;
 	printString("# of Lines per Sheet, before Stop:");
 	BoldFlag = FALSE;
-	UART1_sendChar(ENEWLINE);	
+	UART1_sendChar(eNEWLINE);	
 	printString("enter as 2 Digits Number, 00 for continuous printing: ");
 // -- digit 1
 	do {
@@ -216,7 +217,7 @@ uint8_t a,c,nLines;
 	printChar(a);
 	nLines += a - '0';
 // --
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
 	return nLines;
 }	// end of LPP
 
@@ -280,7 +281,7 @@ void printCurrentSettings(uint8_t i)
 		if (stBaud == 4) printString("2400");		
 		if (stBaud == 5) printString("4800");		
 		if (stBaud == 6) printString("9600");		
-		if (stBaud == 7) printString("115200");		
+		if (stBaud == 7) printString("19200");		
 		break;
 	case 2:
 		if (stProtocol == 1) printString("None");
@@ -292,8 +293,8 @@ void printCurrentSettings(uint8_t i)
 		printChar(MaxLines%10+'0');
 		break;
 	case 4:
-		if (RememberTrans == 1) printString("ASCII");
-		if (RememberTrans == 2) printString("raw");
+		if (RememberTrans == ASCII) printString("ASCII");
+		if (RememberTrans == RAW  ) printString("Typewriter Char Set");
 		break;
 	case 5:
 		if (stCRfromHost == 1) printString("--> CR");
@@ -304,5 +305,5 @@ void printCurrentSettings(uint8_t i)
 		if (stCRtoHost == 2) printString("--> CR LF");
 		break;
 	}
-	UART1_sendChar(ENEWLINE);
+	UART1_sendChar(eNEWLINE);
 }	// end of printCurrentSettings

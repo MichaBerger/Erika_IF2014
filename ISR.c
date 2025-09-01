@@ -23,14 +23,15 @@ ISR (USART1_RX_vect)	// receive from typewriter
 {
 uint8_t c;
 	c = UDR1;
-	if (c == CODE_H) HexToggle = TRUE;
-	if (c == CODE_I) SetupToggle = TRUE;
+	if (c == CODE_Hex)   HexTrigger = TRUE;
+	if (c == CODE_Setup) SetupTrigger = TRUE;
+
 	// reset criteria for line counter:
 	if (c == 0x83) LineCounter = 0;	// paper feed button pressed
 	if (c == 0x75) LineCounter = 0; // half line down
 	//
 	if (stSend) {
-		if (c < 0x7A) {	// filter out control chars > 78h
+		if (c < 0x7A) {	// filter out control chars > 79h
 			keyBuf[keyInPtr++] = c;
 			keyBufUsage++;
 		}

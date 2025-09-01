@@ -1,4 +1,4 @@
-// global variable definitions
+// global variable and constant definitions
 
 #include "main.h"
 
@@ -25,8 +25,8 @@ uint8_t				keyBuf[KEYBUFSIZE];
 volatile uint8_t	keyInPtr;
 		 uint8_t	keyOutPtr;
 volatile uint8_t	keyBufUsage;
-volatile uint8_t	HexToggle;
-volatile uint8_t	SetupToggle;
+volatile uint8_t	HexTrigger;
+volatile uint8_t	SetupTrigger;
 uint8_t				UnderlineFlag;
 uint8_t				BoldFlag;
 
